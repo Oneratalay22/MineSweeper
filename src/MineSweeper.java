@@ -1,121 +1,150 @@
-import java.util.Random;
 import java.util.Scanner;
 
 public class MineSweeper {
-    int rowNumber, colNumber, size;
-    int[][] map;
-    int[][] board;
-    boolean isGame = true;
+    private char[][] map; // Mayınların yerini tutacak matris
+    private char[][] board; // Oyuncuya gösterilecek oyun tahtası
+    private int size; // Matris boyutu
+    private int mines; // Mayın sayısı
+    private int openedCells; // Açılan hücre sayısı
+    private boolean gameover; // Oyunun bitip bitmediği
 
-
-    Random rand = new Random();
-    Scanner input = new Scanner(System.in);
-
-    MineSweeper(int rowNumber, int columnNumber) {
-        this.rowNumber = rowNumber;
-        this.colNumber = columnNumber;
-        this.size = rowNumber * columnNumber;
-        map = new int[rowNumber][columnNumber];
-        board = new int[rowNumber][columnNumber];
+    public MineSweeper(int rows, int cols) {
+        this.size = rows * cols;
+        this.map = new char[rows][cols];
+        this.board = new char[rows][cols];
+        this.mines = size / 4; // Mayın sayısı, eleman sayısının 1/4'ü
+        this.openedCells = 0;
+        this.gameover = false;
+        initializeMap();
+        initializeBoard();
     }
 
-    // Oyunu çalıştıran ana metod
-    public void run() {
-        int row, col, success = 0;
-        prepareGame();
-        //print(map);
-        System.out.println("Oyun Başladı");
-        // Oyun devam ettiği sürece döngü
-        while (isGame) {
-            print(map);// Mayınların bulunduğu haritayı yazdırma
-            System.out.println("=====================");
-            print(board);// Oyuncunun gördüğü oyun tahtasını yazdırma
-            System.out.print("Satır sayısı :");
-            row = input.nextInt();
-            System.out.print("Sütun sayısı :");
-            col = input.nextInt();
-
-
-            if (map[row][col] != -1) {
-                checkMine(row, col);
-                success++;
-                // Eğer kullanıcı tüm boş hücreleri açtıysa
-                if (success == (size - (size / 4))) {
-                    System.out.println("Tebrikler");
-                    break;
-                }
-            } else {
-                isGame = false; // Kullanıcı bir mayına bastıysa oyunu sonlandırma
-                System.out.print("Oyun Bitti...! :");
+    // Haritayı başlangıç durumuna getirme
+    private void initializeMap() {
+        // Tüm hücreleri '-' ile doldur
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                map[i][j] = '-';
             }
-            //break;
         }
-    }
 
-    // Seçilen hücrenin etrafındaki mayınları kontrol eden metod
-    public void checkMine(int r, int c) {
-        // Eğer seçilen hücrede mayın yoksa
-        if (map[r][c] == 0) {
-        }
-        // Sağdaki hücrede mayın varsa
-        if ((c < colNumber - 1) && (map[r][c + 1] == '*')) {
-            board[r][c]++;
-        }
-        // Soldaki hücrede mayın varsa
-        if ((r < rowNumber - 1) && (map[r + 1][c] == '*')) {
-            board[r][c]++;
-        }// Üstteki hücrede mayın varsa
-        if ((r > 0) && (map[r - 1][c] == '*')) {
-            board[r][c]++;
-        }
-        // Alttaki hücrede mayın varsa
-        if ((c > 0) && (map[r][c - 1] == '*')) {
-            board[r][c]++;
-        }// Sağ üst çapraz hücrede mayın varsa
-        if (r > 0 && c < colNumber - 1 && map[r - 1][c + 1] == '*') {
-            board[r][c]++;
-        }
-        // Sol üst çapraz hücrede mayın varsa
-        if (r > 0 && c > 0 && map[r - 1][c - 1] == '*') {
-            board[r][c]++;
-        }
-        // Sağ alt çapraz hücrede mayın varsa
-        if (r < rowNumber - 1 && c < colNumber - 1 && map[r + 1][c + 1] == '*') {
-            board[r][c]++;
-        }
-        // Sol alt çapraz hücrede mayın varsa
-        if (r < rowNumber - 1 && c > 0 && map[r + 1][c - 1] == '*') {
-            board[r][c]++;
-        }
-        if (board[r][c] == 0) {
-            board[r][c] = '-';
-        }
-    }
-
-    public void prepareGame() {
-        int randRow, randCol, count = 0;
-        // Haritada belirlenen mayın sayısına ulaşana kadar döngü
-        while (count != (size / 4)) {
-            randRow = rand.nextInt(rowNumber);
-            randCol = rand.nextInt(colNumber);
-            // Eğer belirlenen hücrede daha önce mayın yoksa
-            if (map[randRow][randCol] != '*') {
-                map[randRow][randCol] = '*';
+        // Mayınları yerleştir
+        int count = 0;
+        while (count < mines) {
+            int row = (int) (Math.random() * map.length);
+            int col = (int) (Math.random() * map[0].length);
+            if (map[row][col] != '*') {
+                map[row][col] = '*';
                 count++;
             }
         }
     }
 
-    public void print(int[][] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr[0].length; j++) {
-                if (arr[i][j] >= 0) {
-                    System.out.print(" ");
-                }
-                System.out.print(arr[i][j] + " ");
+    // Oyun tahtasını başlangıç durumuna getirme
+    private void initializeBoard() {
+        // Tüm hücreleri '-' ile doldur
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                board[i][j] = '-';
+            }
+        }
+    }
+
+    // Oyun tahtasını yazdırma
+    private void printBoard() {
+        System.out.println("Oyun Tahtası:");
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                System.out.print(board[i][j] + " ");
             }
             System.out.println();
         }
     }
-}
 
+    // Mayın haritasını yazdırma
+    private void printMap() {
+        System.out.println("Mayın Haritası:");
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                System.out.print(map[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    // Kullanıcıdan giriş almak
+    private int[] getInput(Scanner scanner) {
+        int[] input = new int[2];
+        System.out.print("Satır sayısı: ");
+        input[0] = scanner.nextInt();
+        System.out.print("Sütun sayısı: ");
+        input[1] = scanner.nextInt();
+        return input;
+    }
+
+    // Oyunu oynama
+    public void play() {
+        Scanner scanner = new Scanner(System.in);
+        while (!gameover) {
+            printMap(); // Mayın haritasını yazdır
+            printBoard(); // Oyun tahtasını yazdır
+            int[] input = getInput(scanner);
+            int row = input[0];
+            int col = input[1];
+            if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
+                System.out.println("Geçersiz giriş. Lütfen tekrar deneyin.");
+                continue;
+            }
+            if (board[row][col] != '-') {
+                System.out.println("Bu koordinat zaten seçildi. Lütfen başka bir koordinat girin.");
+                continue;
+            }
+            if (map[row][col] == '*') {
+                System.out.println("Mayına bastınız! Oyun bitti.");
+                gameover = true;
+            } else {
+                openCell(row, col);
+                if (openedCells == size - mines) {
+                    System.out.println("Tebrikler! Tüm hücreleri açtınız. Oyunu kazandınız!");
+                    gameover = true;
+                }
+            }
+        }
+        scanner.close();
+    }
+
+    // Seçilen hücreyi açma
+    private void openCell(int row, int col) {
+        if (row < 0 || row >= map.length || col < 0 || col >= map[0].length || board[row][col] != '-') {
+            return;
+        }
+        int minesAround = countMines(row, col);
+        board[row][col] = (char) (minesAround + '0');
+        openedCells++;
+        if (minesAround == 0) {
+            openCell(row - 1, col); // Sol
+            openCell(row + 1, col); // Sağ
+            openCell(row, col - 1); // Yukarı
+            openCell(row, col + 1); // Aşağı
+            openCell(row - 1, col - 1); // Sol üst çapraz
+            openCell(row - 1, col + 1); // Sağ üst çapraz
+            openCell(row + 1, col - 1); // Sol alt çapraz
+            openCell(row + 1, col + 1); // Sağ alt çapraz
+        }
+    }
+
+    // Belirtilen hücrenin etrafındaki mayın sayısını sayma
+    // Seçilen hücrenin etrafındaki mayın sayısını sayma
+    private int countMines(int row, int col) {
+        int count = 0;
+        for (int i = row - 1; i <= row + 1; i++) {
+            for (int j = col - 1; j <= col + 1; j++) {
+                if (i >= 0 && i < map.length && j >= 0 && j < map[0].length && map[i][j] == '*') {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+}
