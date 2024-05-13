@@ -28,7 +28,7 @@ public class MineSweeper {
             }
         }
 
-        // Mayınları yerleştir
+        // Mayınları yerleştir- Aynı yerlere mayın gelmemesi fixlendi.
         int count = 0;
         while (count < mines) {
             int row = (int) (Math.random() * map.length);
@@ -39,6 +39,7 @@ public class MineSweeper {
             }
         }
     }
+
 
     // Oyun tahtasını başlangıç durumuna getirme
     private void initializeBoard() {
@@ -52,7 +53,7 @@ public class MineSweeper {
 
     // Oyun tahtasını yazdırma
     private void printBoard() {
-        System.out.println("Oyun Tahtası:");
+        System.out.println("Oyun Tahtası :");
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[0].length; j++) {
                 System.out.print(board[i][j] + " ");
@@ -63,7 +64,7 @@ public class MineSweeper {
 
     // Mayın haritasını yazdırma
     private void printMap() {
-        System.out.println("Mayın Haritası:");
+        System.out.println("Mayın Haritası :");
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 System.out.print(map[i][j] + " ");
@@ -72,13 +73,22 @@ public class MineSweeper {
         }
     }
 
-    // Kullanıcıdan giriş almak
+    private boolean isValidCoordinate(int row, int col) {
+        return row >= 0 && row < map.length && col >= 0 && col < map[0].length;
+    }
+
+    // Kullanıcıdan giriş almak ve geçerli bir koordinat sağlamak
     private int[] getInput(Scanner scanner) {
         int[] input = new int[2];
-        System.out.print("Satır sayısı: ");
-        input[0] = scanner.nextInt();
-        System.out.print("Sütun sayısı: ");
-        input[1] = scanner.nextInt();
+        do {
+            System.out.print("Satır sayısı Giriniz ! : ");
+            input[0] = scanner.nextInt();
+            System.out.print("Sütun sayısı Giriniz ! : ");
+            input[1] = scanner.nextInt();
+            if (!isValidCoordinate(input[0], input[1])) {
+                System.out.println("Girdiğiniz koordinatlar geçersiz. Lütfen sınırlar içinde bir koordinat girin.!");
+            }
+        } while (!isValidCoordinate(input[0], input[1]));
         return input;
     }
 
@@ -92,20 +102,20 @@ public class MineSweeper {
             int row = input[0];
             int col = input[1];
             if (row < 0 || row >= map.length || col < 0 || col >= map[0].length) {
-                System.out.println("Geçersiz giriş. Lütfen tekrar deneyin.");
+                System.out.println("Geçersiz giriş. Lütfen tekrar deneyin.!");
                 continue;
             }
             if (board[row][col] != '-') {
-                System.out.println("Bu koordinat zaten seçildi. Lütfen başka bir koordinat girin.");
+                System.out.println("Bu koordinat zaten seçildi. Lütfen başka bir koordinat girin.!");
                 continue;
             }
             if (map[row][col] == '*') {
-                System.out.println("Mayına bastınız! Oyun bitti.");
+                System.out.println("Mayına bastınız! Oyun bitti.!" + "BOOOOOOOOOOM");
                 gameover = true;
             } else {
                 openCell(row, col);
                 if (openedCells == size - mines) {
-                    System.out.println("Tebrikler! Tüm hücreleri açtınız. Oyunu kazandınız!");
+                    System.out.println("Tebrikler! Oyunu kazandınız.!");
                     gameover = true;
                 }
             }
